@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain AI Chatbot</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .chat-container { width: 450px; height: 600px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: #007bff; color: #fff; padding: 16px; text-align: center; font-weight: bold; font-size: 1.1rem; }
+        .chat-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { max-width: 80%; padding: 10px 14px; border-radius: 16px; line-height: 1.4; font-size: 0.95rem; }
+        .user-msg { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot-msg { background: #e9ecef; color: #212529; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-input { display: flex; border-top: 1px solid #dee2e6; padding: 10px; background: #fafafa; }
+        .chat-input input { flex: 1; border: 1px solid #ced4da; padding: 10px; border-radius: 20px; outline: none; }
+        .chat-input button { background: #007bff; color: white; border: none; border-radius: 20px; padding: 10px 18px; margin-left: 8px; cursor: pointer; }
+        .chat-input button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">{{ domain_name }} Assistant</div>
+        <div class="chat-box" id="chatBox">
+            <div class="message bot-msg">Hello! How can I assist you with your orders and store queries today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKey(event)" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const sessionId = "user_session_" + Math.random().toString(36).substring(2, 9);
+
+        async function sendMessage() {
+            const input = document.getElementById("userInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage(text, "user-msg");
+            input.value = "";
+
+            try {
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text, session_id: sessionId })
+                });
+
+                const data = await res.json();
+                if (data.response) {
+                    appendMessage(data.response, "bot-msg");
+                } else {
+                    appendMessage("Error: " + (data.error || "Failed to respond."), "bot-msg");
+                }
+            } catch (err) {
+                appendMessage("Something went wrong. Please try again.", "bot-msg");
+            }
+        }
+
+        function appendMessage(msg, className) {
+            const chatBox = document.getElementById("chatBox");
+            const div = document.createElement("div");
+            div.className = `message ${className}`;
+            div.innerText = msg;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKey(e) {
+            if (e.key === "Enter") sendMessage();
+        }
+    </script>
+</body>
+</html>
