@@ -8,7 +8,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize the Google GenAI Client
+# Initialize Google GenAI Client
 client = genai.Client()
 
 DOMAIN_NAME = "E-Commerce Customer Care"
@@ -53,4 +53,5 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
