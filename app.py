@@ -37,7 +37,7 @@ def chat():
     try:
         if session_id not in chat_sessions:
             chat_sessions[session_id] = client.chats.create(
-                model="gemini-3.1-flash-lite",
+                model="gemini-3.6-flash",
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_INSTRUCTION,
                     temperature=0.7,
